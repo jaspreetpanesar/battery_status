@@ -52,6 +52,7 @@ class Battery(object):
     def __init__(self, *args, **kwargs):
         for i in kwargs:
             setattr(self, i, kwargs[i])
+        log.info("created battery object %s" %self)
 
 
 
@@ -67,7 +68,8 @@ class Battery(object):
 
 
 
-
+if __name__ == "__main__":
+    pass
 
 
 
