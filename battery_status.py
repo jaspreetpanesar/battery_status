@@ -1,13 +1,18 @@
 
 """
-*Battery Status Display*
+**Battery Status Display**
 
-Returns battery information in long text form
+Displays battery information in long text form
 or minimal visual display
 """
 
 
 import os, sys, argparse, subprocess, time, logging
+
+
+__author__  = "Jaspreet Panesar"
+__version__ = 1
+
 
 # ----- LOGGING SETUP -----
 log = logging.getLogger(__name__)
@@ -46,8 +51,17 @@ class Battery(object):
 
     """
 
-    ATTRIBUTES = ["capacity", "temp", "health", "status", "chargeCounter", 
-                    "current_now", "technology", "voltage"]
+    ATTRIBUTES = { 
+                    "capacity": "battery/capacity", 
+                    "temp": "battery/temp", 
+                    "health": "battery/health", 
+                    "status": "battery/status", 
+                    "chargeCounter": "battery/charge_counter", 
+                    "currentNow": "battery/current_now", 
+                    "technology": "battery/technology", 
+                    "voltage": "battery/voltage_now"
+                }
+
 
     def __init__(self, *args, **kwargs):
         for i in kwargs:
@@ -55,12 +69,36 @@ class Battery(object):
         log.info("created battery object %s" %self)
 
 
+    def read(self):
+        """ """
+        log.info("battery data read started")
+        for i in Battery.ATTRIBUTES:
+            filepath = os.path.dirname(os.path.realpath(
+                            "/sys/class/power_supply" + Battery.ATTRIBUTES[i]) )
+            try:
+                data = readData(filepath)
+            except IOError as e:
+                log.error("'%s' data read unsuccessful with error: %s" %(i, e))
+                continue
+            if data:
+                setattr(self, i, data)
+                log.info("'%s' data read successful" %i)
+            else:
+                log.info("'%s' data read unsuccessful" %i)
+            log.debug("'%s' = %s" %(i, data))
+
+        log.info("battery data read complete")
+
 
 
     def showMinimal(self):
+        """ """
+        log.info("Battery.showMinimal called")
         return ""
 
-    def howAll(self):
+    def showAll(self):
+        """ """
+        log.info("Battery.showAll called")
         return ""
 
     def __repr__(self):
@@ -68,8 +106,36 @@ class Battery(object):
 
 
 
+
+
+# TODO 
+def readData(filepath):
+    """returns the contents of file
+    
+    Args:
+        filepath (string): full path of files to be read
+
+    Raises:
+    
+    """
+    # TODO
+    try:
+        with open(filepath) as f:
+            content = f.readlines()
+    except OSError as e:
+        log.error("OS error occured: %s" %e)
+        return None
+
+    data = content.strip()
+    return data
+
+
+
 if __name__ == "__main__":
     pass
+
+
+
 
 
 
