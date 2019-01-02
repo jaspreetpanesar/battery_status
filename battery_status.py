@@ -6,8 +6,12 @@ Displays battery information in long text form
 or minimal visual display
 """
 
-
-import os, sys, argparse, subprocess, time, logging
+import os
+import sys
+import argparse
+import subprocess
+import time
+import logging
 
 
 __author__  = "Jaspreet Panesar"
@@ -108,31 +112,43 @@ class Battery(object):
 
 
 
-# TODO 
 def readData(filepath):
     """returns the contents of file
     
     Args:
         filepath (string): full path of files to be read
-
-    Raises:
-    
+        
+    Returns:
+        string or None: content in string form if found, or None if 
+            not found.
     """
-    # TODO
     try:
         with open(filepath) as f:
             content = f.readlines()
+    except IOError as e:
+        log.error("File not found: %s" %e)
+        return None
     except OSError as e:
         log.error("OS error occured: %s" %e)
         return None
 
-    data = content.strip()
+    log.debug("content = %s" %content)
+    
+    # remove trailing \n character
+    # assumption - there will only be one line of data
+    data = content[0].strip()
+    log.debug("data = %s" %data)
+
     return data
+
+
+def main():
+    pass
 
 
 
 if __name__ == "__main__":
-    pass
+    main()
 
 
 
