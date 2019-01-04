@@ -21,56 +21,64 @@ log.addHandler(fh)
 # --- END LOGGING SETUP ---
 
 
-class ReadDataTest(unittest.TestCase):
 
-    def test_readCapacity(self):
-        filepath = "/sys/class/power_supply/battery/capacity"
-        data = readData(filepath)
-        if not data:
-            self.fail()
+class Battery_read_test(unittest.TestCase):
 
-
-    def test_wrong_filepath(self):
-        filepath = "/incorrect/file/path"
-        data = readData(filepath)
-        if data:
-            self.fail()
-
-
-class BatteryTest(unittest.TestCase):
-
-    def test_read(self):
+    def test_successful(self):
         b = Battery()
         b.read()
-
-
-    def test_getattr(self):
-        b = Battery()
-        b.read()
-
         for i in Battery.ATTRIBUTES:
             if not getattr(b, i, None):
+                log.error("battery_read_test fail on %s" %i)
                 self.fail()
 
-    def test_getfancyattr(self):
-        b = Battery()
-        b.read()
 
-        try:
-            val = b.getFancyFormatAttr("capacity")
-            log.info("fancyattr result = %s" %val)
-        except Exception as e:
+
+class Battery_getAttr_test(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        """runs before each test class"""
+        cls.b = Battery()
+        cls.b.read()
+
+
+    def test_string_return(self):
+        value = self.b.getAttr("health")
+        if not value:
             self.fail()
 
 
-    def showAll(self):
-        b = Battery()
-        b.read()
-        try:
-            log.info(b.viewAll())
-        except Exception as e:
-            log.error(e)
-            f.fail()
+    def test_none_return(self):
+        attr = self.b.getAttr("incorrectattribute")
+        if attr != None:
+            self.fail()
+
+
+    def test_int_return(self):
+        value = self.b.getAttr("capacity")
+        if value:
+            if isinstance(value, int):
+                return
+        self.fail()
+
+
+class readData_test(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        """runs before each test class"""
+        pass
+
+    def setUp(self):
+        """runs before each test case"""
+        pass
+
+
+
+
+
+
 
 
 
