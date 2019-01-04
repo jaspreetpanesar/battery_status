@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
 **Battery Status Display**
@@ -12,6 +13,7 @@ import argparse
 import subprocess
 import time
 import logging
+import random
 
 
 __author__  = "Jaspreet Panesar"
@@ -30,41 +32,100 @@ fh.setFormatter(formatter)
 log.addHandler(fh)
 
 # console logging
-ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
-ch.setFormatter(formatter)
-log.addHandler(ch)
+# ch = logging.StreamHandler()
+# ch.setLevel(logging.ERROR)
+# ch.setFormatter(formatter)
+# log.addHandler(ch)
 # --- END LOGGING SETUP ---
+
+
+def fancy_prefix(value, format):
+    return "%s%s" %(format, str(value))
+
+
+def fancy_suffix(value, format):
+    return "%s%s" %(str(value), format)
+
+
+def fancy_decimal(value, decimal):
+    return "%.*f" % (decimal, value)
+
+
+def fancy_case(value, case):
+
+    # get Capital case
+    if case == "capital":
+        return "%s%s" %(value[0].upper(), value[1:].lower())
+
+    # get UPPER case
+    if case == "upper":
+        return value.upper()
+
+    # get lower case
+    if case == "lower":
+        return value.lower()
+
+    # get RaNDomIsed case
+    if case == "random":
+        newval = ""
+        for i in value:
+            if bool(random.getrandbits(1)):
+                newval += i.upper()
+            else:
+                newval += i.lower()
+        return newval
+
+
+class FancyFormatNotAvailableException(Exception):
+    """ """
+    pass
 
 
 class Battery(object):
     """storage for battery status data
 
     Attributes:
-        -- data --
         capacity (int): reads the current charge  of the battery
         temp (int): reads the currrent temperature of the battery
         health (string): describes the health of the battery
         status (string): describes whether the battery is discharging or charging
-        
-        -- information --
         chargeCounter (int): max charge cycle count
         current_now (int): current charge cycle count
         technology (string): type of battery
         voltage (int): current voltage
-
     """
 
     ATTRIBUTES = { 
-                    "capacity": "battery/capacity", 
-                    "temp": "battery/temp", 
-                    "health": "battery/health", 
-                    "status": "battery/status", 
-                    "chargeCounter": "battery/charge_counter", 
-                    "currentNow": "battery/current_now", 
-                    "technology": "battery/technology", 
-                    "voltage": "battery/voltage_now"
-                }
+        "capacity":     {"path": "/sys/class/power_supply/battery/capacity",
+                         "suffix": "%"
+                         },
+        "temp":         {"path": "/sys/class/power_supply/battery/temp",
+                         "suffix": "°C", "decimal": 2
+                         }, 
+        "health":       {"path": "/sys/class/power_supply/battery/health",
+                         "case": "capital"
+                         }, 
+        "status":       {"path": "/sys/class/power_supply/battery/status",
+                         "case": "upper"
+                         }, 
+        "chargeCount":  {"path": "/sys/class/power_supply/battery/charge_counter"
+                         }, 
+        "currentNow":   {"path": "/sys/class/power_supply/battery/current_now"
+                         }, 
+        "technology":   {"path": "/sys/class/power_supply/battery/technology",
+                         "case": "upper"
+                         }, 
+        "voltage":      {"path": "/sys/class/power_supply/battery/voltage_now"
+                         }
+    }
+
+
+    FANCY_FORMATS = {
+        "prefix":       {"function": fancy_prefix},
+        "suffix":       {"function": fancy_suffix},
+        "decimal":      {"function": fancy_decimal},
+        "case":         {"function": fancy_case}
+    }
 
 
     def __init__(self, *args, **kwargs):
@@ -74,41 +135,117 @@ class Battery(object):
 
 
     def read(self):
-        """ """
+        """read battery data from system files and save
+        as class attributes"""
+
         log.info("battery data read started")
         for i in Battery.ATTRIBUTES:
-            filepath = os.path.dirname(os.path.realpath(
-                            "/sys/class/power_supply" + Battery.ATTRIBUTES[i]) )
-            try:
-                data = readData(filepath)
-            except IOError as e:
-                log.error("'%s' data read unsuccessful with error: %s" %(i, e))
+            filepath = Battery.ATTRIBUTES[i]["path"]
+            data = readData(filepath)
+            if not data:
+                log.info("'%s' data read unsuccessful" %i)
                 continue
-            if data:
+            else:
                 setattr(self, i, data)
                 log.info("'%s' data read successful" %i)
-            else:
-                log.info("'%s' data read unsuccessful" %i)
-            log.debug("'%s' = %s" %(i, data))
 
         log.info("battery data read complete")
 
 
+    def getAttr(self, attr):
+        """returns value stored in attribute
+        
+        Args:
+            attr (string): attribute to read value of
+        
+        Returns:
+            string or int or None: respective value type returned or
+                None if value does not exist.
+        """
+        log.info("running getattr '%s' for battery" %attr)
+        try:
+            val = getattr(self, attr)   # AttributeError
+            val = int(val)              # ValueError
+        except AttributeError as e:
+            log.error("Error: could not retrieve attribute - %s" %e)
+            return None
+        except ValueError:
+            log.warning("Attribute '%s' cannot be converted to int" %val)
+        log.debug("Attribute '%s' = %s" %(attr, val))
+        return val
 
-    def showMinimal(self):
+
+    def getFancyFormatAttr(self, attr):
+        """returns fancy format of attribute
+        value
+
+        Fancy formatted is value with any required
+        prefix or suffix and decimal positioning or 
+        any other changes required to make value human
+        readable.
+        
+        Args:
+            attr (string): attribute to get value of
+        
+        Returns:
+            string: fancy format of attribute value or None
+                if attribute not available.
+        
+        Raises:
+            FancyFormatNotAvailableException: if attr does
+                not have fancy format.
+        """
+        log.info("running formatattr '%s'" %attr)
+        val = self.getAttr(attr)
+        if val:
+            log.info("attribute exists")
+            for f in Battery.FANCY_FORMATS:
+                log.info("searching for format '%s'" %f)
+                try:
+                    # grab format from attribute list
+                    # exits on error
+                    form = Battery.ATTRIBUTES[attr][f]      # KeyError
+                    log.info("format %s found" %f)
+                    
+                    # grab function from format list
+                    func = Battery.FANCY_FORMATS[f]["function"]
+
+                    # convert value
+                    newval = func(val, form)
+                    log.info("value converted")
+                    log.debug("new value = %s" %newval)
+                    return newval
+
+                except KeyError:
+                    log.warning("no '%s' format for %s" %(f, attr))
+                except Exception as e:
+                    log.error("fancy attribute conversion error: %s" %e)
+
+        else:
+            log.warning("attribute does not exist")
+        return val
+
+
+    def viewMinimal(self):
         """ """
         log.info("Battery.showMinimal called")
+        view = "[⇋]:"
         return ""
 
-    def showAll(self):
+
+    def viewAll(self):
         """ """
         log.info("Battery.showAll called")
-        return ""
+        view = ""
+
+        for i in Battery.ATTRIBUTES:
+            view += "\n\t%-15s: %s" %(i, getattr(self, i, "no available"))
+
+        return view
+
 
     def __repr__(self):
-        return "<Battery()>"
-
-
+        return "<Battery(charge=%s)>" %getattr(self, "charge", "no available")
 
 
 
@@ -149,12 +286,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
 

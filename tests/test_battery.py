@@ -76,7 +76,37 @@ class readData_test(unittest.TestCase):
 
 
 
+class fancyAttr_test(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        """runs before each test class"""
+        cls.b = Battery()
+        cls.b.read()
+
+    def setUp(self):
+        """runs before each test case"""
+        pass
+
+    def test_capacity_correct(self):
+        """test case"""
+        value = self.b.getFancyFormatAttr("capacity")
+        if not value.endswith("%"):
+            self.debug("fancy attribute test fail: new val = %s" %value)
+            self.fail()
+        log.debug("fancy attribute correct: new val = %s" %value)
+
+
+    def test_fancy_attr_all(self):
+        log.info("fancy attr all test")
+        for i in Battery.ATTRIBUTES:
+            log.info("fancy attr %s" %i)
+            try:
+                value = self.b.getFancyFormatAttr(i)
+                log.debug("Attribute: %s = %s" %(i, value))
+            except Exception as e:
+                log.error("fancy attr all test fail: %s" %e)
+                continue
 
 
 
