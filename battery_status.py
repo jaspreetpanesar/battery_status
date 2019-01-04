@@ -146,7 +146,7 @@ class Battery(object):
                          "suffix": "°C", "decimal": 2
                          }, 
         "health":       {"path": "/sys/class/power_supply/battery/health",
-                         "case": "capital"
+                         "case": "capital", "suffix": " omg that's nice"
                          }, 
         "status":       {"path": "/sys/class/power_supply/battery/status",
                          "case": "upper"
@@ -164,10 +164,10 @@ class Battery(object):
 
 
     FANCY_FORMATS = {
+        "case":         {"function": fancy_case},
+        "decimal":      {"function": fancy_decimal},
         "prefix":       {"function": fancy_prefix},
         "suffix":       {"function": fancy_suffix},
-        "decimal":      {"function": fancy_decimal},
-        "case":         {"function": fancy_case}
     }
 
 
@@ -250,10 +250,8 @@ class Battery(object):
                     func = Battery.FANCY_FORMATS[f]["function"]
 
                     # convert value
-                    newval = func(val, form)
-                    log.info("value converted")
+                    val = func(val, form)
                     log.debug("new value = %s" %newval)
-                    return newval
 
                 except KeyError:
                     log.warning("no '%s' format for %s" %(f, attr))
