@@ -40,19 +40,67 @@ log.addHandler(fh)
 
 
 def fancy_prefix(value, format):
+    """return string with prefix formatted
+    added at front
+    
+    Args:
+        value (string): the string value to 
+            be modified
+        format (string): the prefix to add on to
+            string
+    
+    Returns:
+        string: formatted string with prefix
+    """
     return "%s%s" %(format, str(value))
 
 
 def fancy_suffix(value, format):
+    """return string with suffix formatted
+    added at end
+    
+    Args:
+        value (string): the string value to 
+            be modified
+        format (string): the suffix to add on to
+            string
+    
+    Returns:
+        string: formatted string with suffix
+    """
     return "%s%s" %(str(value), format)
 
 
 def fancy_decimal(value, decimal):
+    """returns integer value as decimal float
+    value to specified decimal place
+    
+    Args:
+        value (int): integer to conver to decimal
+        decimal (string): decimal places to convert
+            integer to
+    
+    Returns:
+        float: formatted floating point number
+    """
     return "%.*f" % (decimal, value)
 
 
 def fancy_case(value, case):
-
+    """returns string formatted to specified
+    case
+    
+    Args:
+        value (string): 
+        case (string): coos from following:
+                capital: Example 
+                upper: EXAMPLE
+                lower: example
+                random: eXAmPlE
+    
+    Returns:
+        string: string with formatted case 
+    """
     # get Capital case
     if case == "capital":
         return "%s%s" %(value[0].upper(), value[1:].lower())
@@ -74,11 +122,6 @@ def fancy_case(value, case):
             else:
                 newval += i.lower()
         return newval
-
-
-class FancyFormatNotAvailableException(Exception):
-    """ """
-    pass
 
 
 class Battery(object):
@@ -190,10 +233,6 @@ class Battery(object):
         Returns:
             string: fancy format of attribute value or None
                 if attribute not available.
-        
-        Raises:
-            FancyFormatNotAvailableException: if attr does
-                not have fancy format.
         """
         log.info("running formatattr '%s'" %attr)
         val = self.getAttr(attr)

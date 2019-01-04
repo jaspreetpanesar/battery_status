@@ -104,6 +104,8 @@ class fancyAttr_test(unittest.TestCase):
             try:
                 value = self.b.getFancyFormatAttr(i)
                 log.debug("Attribute: %s = %s" %(i, value))
+                if not value:
+                    self.fail()
             except Exception as e:
                 log.error("fancy attr all test fail: %s" %e)
                 continue
