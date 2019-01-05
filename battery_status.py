@@ -4,7 +4,7 @@
 **Battery Status Display**
 
 Displays battery information in long text form
-or minimal visual display
+or a minimal graphical display.
 """
 
 import os
@@ -32,33 +32,8 @@ try:
     fh.setFormatter(formatter)
     log.addHandler(fh)
 except IOError as e:
-    pass
-
-# console logging
-# ch = logging.StreamHandler()
-# ch.setLevel(logging.ERROR)
-# ch.setFormatter(formatter)
-# log.addHandler(ch)
-# --- END LOGGING SETUP ---
-
-
-class log(object):
-
-    @staticmethod
-    def info(self, *args):
-        pass
-
-    @staticmethod
-    def error(self, *args):
-        pass
-
-    @staticmethod
-    def warning(self, *args):
-        pass
-
-    @staticmethod
-    def debug(self, *args):
-        pass
+    nh = logging.NullHandler()
+    log.addHandler(nh)
 
 
 def fancy_prefix(value, format):
@@ -155,9 +130,8 @@ def fancy_case(value, case):
 
 
 class Colour(object):
-    """Wrapper class to format text for
-    printing to stdout using ANSI escape
-    sequences.
+    """Format text for printing to stdout 
+    using ANSI escape sequences.
     """
 
     PURPLE = '\033[95m'
@@ -173,7 +147,7 @@ class Colour(object):
 
     @staticmethod
     def format(text, colour):
-        """return text formmated with colour prefix
+        """return text fromatted with colour prefix
         and suffix
         
         Args:
@@ -189,7 +163,7 @@ class Colour(object):
 
 
 class Battery(object):
-    """storage for battery status data
+    """battery status data
 
     Attributes:
         capacity (int): reads the current charge  of the battery
@@ -360,14 +334,15 @@ class Battery(object):
             else:
                 icon = "x"
         except AttributeError as e:
-            log.error("charge could not be read: %s" %e)
+            log.error("status could not be read: %s" %e)
             icon = "?"
 
-        # set number of charge icons to show in body
+        # set icon body
         if not charge:
             charge = self.getAttr("capacity")
         log.debug("charge = %s" %charge)
 
+        # determine body icon count
         try:
             if charge >= 80:
                 body = "{0}{0}{0}".format(icon)

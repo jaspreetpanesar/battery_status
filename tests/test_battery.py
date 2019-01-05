@@ -4,10 +4,7 @@ import unittest
 import sys
 import os
 
-try:
-    from battery_status import *
-except ImportError:
-    from ...battery_status import *
+from battery_status import *
 
 # ----- LOGGING SETUP -----
 log = logging.getLogger(__name__)
@@ -15,10 +12,13 @@ log.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 # file logging
-fh = logging.FileHandler("logs/test.log")
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-log.addHandler(fh)
+try:
+    fh = logging.FileHandler("logs/test.log")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+except IOError:
+    pass
 
 # console logging
 # ch = logging.StreamHandler()
@@ -70,19 +70,6 @@ class getAttr_test(unittest.TestCase):
         self.fail()
 
 
-class readData_test(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        """runs before each test class"""
-        pass
-
-    def setUp(self):
-        """runs before each test case"""
-        pass
-
-
-
 class getFancyFormatAttr_test(unittest.TestCase):
 
     @classmethod
@@ -91,9 +78,6 @@ class getFancyFormatAttr_test(unittest.TestCase):
         cls.b = Battery()
         cls.b.read()
 
-    def setUp(self):
-        """runs before each test case"""
-        pass
 
     def test_capacity_correct(self):
         """test case"""
