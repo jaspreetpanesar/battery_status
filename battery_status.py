@@ -26,10 +26,13 @@ log.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 # file logging
-fh = logging.FileHandler("logs/battery_status.log")
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-log.addHandler(fh)
+try:
+    fh = logging.FileHandler("logs/battery_status.log")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+except IOError as e:
+    pass
 
 # console logging
 # ch = logging.StreamHandler()
@@ -37,6 +40,25 @@ log.addHandler(fh)
 # ch.setFormatter(formatter)
 # log.addHandler(ch)
 # --- END LOGGING SETUP ---
+
+
+class log(object):
+
+    @staticmethod
+    def info(self, *args):
+        pass
+
+    @staticmethod
+    def error(self, *args):
+        pass
+
+    @staticmethod
+    def warning(self, *args):
+        pass
+
+    @staticmethod
+    def debug(self, *args):
+        pass
 
 
 def fancy_prefix(value, format):
@@ -217,6 +239,7 @@ class Battery(object):
         for i in kwargs:
             setattr(self, i, kwargs[i])
         log.info("created battery object %s" %self)
+        self.read()
 
 
     def read(self):
@@ -349,15 +372,15 @@ class Battery(object):
             if charge >= 80:
                 body = "{0}{0}{0}".format(icon)
                 if showcolour:
-                    body = Colour.format(body, Colour.CYAN)
+                    body = Colour.format(body, Colour.GREEN)
             elif charge >= 35:
                 body = "{0}{0} ".format(icon)
                 if showcolour:
-                    body = Colour.format(body, Colour.DARKCYAN)
+                    body = Colour.format(body, Colour.CYAN)
             elif charge >= 15:
                 body = "{0}  ".format(icon)
                 if showcolour:
-                    body = Colour.format(body, Colour.PURPLE)
+                    body = Colour.format(body, Colour.YELLOW)
             else:
                 body = " %s " %icon
                 if showcolour:
@@ -440,8 +463,8 @@ def readData(filepath):
 
     log.debug("content = %s" %content)
     
-    # remove trailing \n character
     # assumption - there will only be one line of data
+    # remove trailing \n character
     data = content[0].strip()
     log.debug("data = %s" %data)
 
@@ -449,9 +472,7 @@ def readData(filepath):
 
 
 def main():
-    b = Battery()
-    b.read()
-    print(b.showMinimal(showcolour=True))
+    print(Battery().showMinimal(showcolour=False))
 
 
 
