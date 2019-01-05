@@ -132,6 +132,40 @@ def fancy_case(value, case):
         return newval
 
 
+class Colour(object):
+    """Wrapper class to format text for
+    printing to stdout using ANSI escape
+    sequences.
+    """
+
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+    @staticmethod
+    def format(text, colour):
+        """return text formmated with colour prefix
+        and suffix
+        
+        Args:
+            text (string): text to be formatted with color/
+                options.
+            colour (Colour.Attribute): color identifier from
+                Colour class to format text with.
+        
+        Returns:
+            string: formatted string
+        """
+        return "%s%s%s" %(colour, text, Colour.END)
+
+
 class Battery(object):
     """storage for battery status data
 
@@ -154,7 +188,7 @@ class Battery(object):
                          "suffix": "°C", "decimal": 2
                          }, 
         "health":       {"path": "/sys/class/power_supply/battery/health",
-                         "case": "capital", "suffix": " omg that's nice"
+                         "case": "capital"
                          }, 
         "status":       {"path": "/sys/class/power_supply/battery/status",
                          "case": "upper"
@@ -295,23 +329,31 @@ class Battery(object):
             status = self.getAttr("status")
         log.debug("status = %s" %status)
 
-        if status.lower() == "charging":
-            icon = "+"
-        else:
-            icon = "x"
+        try:
+            if status.lower() == "charging":
+                icon = "+"
+            else:
+                icon = "x"
+        except AttributeError as e:
+            log.error("charge could not be read: %s" %e)
+            icon = "?"
 
         # set number of charge icons to show in body
         if not charge:
             charge = self.getAttr("capacity")
         log.debug("charge = %s" %charge)
 
-        if charge >= 80:
-            body = "{0}{0}{0}".format(icon)
-        elif charge >= 55:
-            body = "{0}{0} ".format(icon)
-        elif charge >= 15:
-            body = "{0}  ".format(icon)
-        else:
+        try:
+            if charge >= 80:
+                body = "{0}{0}{0}".format(icon)
+            elif charge >= 35:
+                body = "{0}{0} ".format(icon)
+            elif charge >= 15:
+                body = "{0}  ".format(icon)
+            else:
+                body = " %s " %icon
+        except TypeError as e:
+            log.error("charge could not be read: %s" %e)
             body = " %s " %icon
 
         # frame body
@@ -384,6 +426,7 @@ def main():
     b = Battery()
     b.read()
     print(b.showMinimal())
+    # print( Colour.format(b.showMinimal(), Colour.GREEN) )
 
 
 

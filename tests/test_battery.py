@@ -174,6 +174,7 @@ class getCapacityIcon_test(unittest.TestCase):
         b = Battery()
         try:
             icon = b.getCapacityIcon()
+            log.info("icon with no info: %s" %icon)
         except Exception as e:
             log.error("icon status none test fail: %s" %e)
             self.fail()
