@@ -84,10 +84,7 @@ def fancy_decimal(value, decimal):
     """
     newval = float(value)
     for i in range(decimal):
-        try:
-            newval = newval/10
-        except ZeroDivisionError:
-            return None
+        newval = newval/10
     return "%.*f" %(decimal, newval)
 
 
@@ -290,12 +287,10 @@ class Battery(object):
 
                     # convert value
                     val = func(val, form)
-                    log.debug("new value = %s" %newval)
+                    log.debug("new value = %s" %val)
 
                 except KeyError:
                     log.warning("no '%s' format for %s" %(f, attr))
-                except Exception as e:
-                    log.error("fancy attribute conversion error: %s" %e)
 
         else:
             log.warning("attribute does not exist")
