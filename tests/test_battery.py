@@ -170,6 +170,15 @@ class getCapacityIcon_test(unittest.TestCase):
         log.debug(icon)
         self.assertEqual(icon, "[ + ]•")
 
+    def test_icon_status_none(self):
+        b = Battery()
+        try:
+            icon = b.getCapacityIcon()
+        except Exception as e:
+            log.error("icon status none test fail: %s" %e)
+            self.fail()
+
+
 
 
 if __name__ == "__main__":

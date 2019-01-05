@@ -381,7 +381,9 @@ def readData(filepath):
 
 
 def main():
-    pass
+    b = Battery()
+    b.read()
+    print(b.showMinimal())
 
 
 
