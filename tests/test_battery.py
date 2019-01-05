@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import unittest
 import sys
@@ -124,6 +125,50 @@ class getFancyFormatAttr_test(unittest.TestCase):
             self.fail()
         log.debug("fancy attribute correct: new val = %s" %value)
 
+
+class getCapacityIcon_test(unittest.TestCase):
+
+    def test_icon_case1(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("discharging", 80)
+        log.debug(icon)
+        self.assertEqual(icon, "[xxx]•")
+
+    def test_icon_case2(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("discharging", 55)
+        log.debug(icon)
+        self.assertEqual(icon, "[xx ]•")
+
+    def test_icon_case3(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("discharging", 33)
+        log.debug(icon)
+        self.assertEqual(icon, "[x  ]•")
+
+    def test_icon_case4(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("discharging", 10)
+        log.debug(icon)
+        self.assertEqual(icon, "[ x ]•")
+
+    def test_icon_case5(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("charging", 90)
+        log.debug(icon)
+        self.assertEqual(icon, "[+++]•")
+
+    def test_icon_case6(self):
+        b = Battery()
+        b.read()
+        icon = b.getCapacityIcon("charging", 5)
+        log.debug(icon)
+        self.assertEqual(icon, "[ + ]•")
 
 
 

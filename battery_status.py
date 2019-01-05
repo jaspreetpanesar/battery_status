@@ -271,11 +271,55 @@ class Battery(object):
         return val
 
 
-    def viewMinimal(self):
+    def getCapacityIcon(self, status=None, charge=None):
+        """returns battery icon showing capcity and status
+
+        Args:
+            status (string): for debugging, specify charge status
+            charge (int):  for debugging, specify charge remaining
+
+        Example:
+            [xxx]•  = discharging >= 80%
+            [xx ]•  = discharging >= 55%
+            [ x ]•  = discharging < 15%
+            [++ ]•  = charging    >= 60%
+            [ + ]•  = charging    > 15%
+        """
+        log.info("getCapacityIcon called")
+
+        # determine charge icon
+        if not status:
+            status = self.getAttr("status")
+        log.debug("status = %s" %status)
+
+        if status.lower() == "charging":
+            icon = "+"
+        else:
+            icon = "x"
+
+        # set number of charge icons to show in body
+        if not charge:
+            charge = self.getAttr("capacity")
+        log.debug("charge = %s" %charge)
+
+        if charge >= 80:
+            body = "{0}{0}{0}".format(icon)
+        elif charge >= 55:
+            body = "{0}{0} ".format(icon)
+        elif charge >= 15:
+            body = "{0}  ".format(icon)
+        else:
+            body = " %s " %icon
+
+        # frame body
+        final = "[%s]•"%body
+        log.debug("final icon = %s" %final)
+        return final
+
+
+    def showMinimal(self):
         """ """
-        log.info("Battery.showMinimal called")
-        view = "[⇋]:"
-        return ""
+        return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon())
 
 
     def viewAll(self):
