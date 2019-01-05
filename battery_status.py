@@ -81,9 +81,17 @@ def fancy_decimal(value, decimal):
             integer to
     
     Returns:
-        float: formatted floating point number
+        float: formatted floating point number or None
+            if a zero division error is raised while
+            formatting.
     """
-    return "%.*f" % (decimal, value)
+    newval = float(value)
+    for i in range(decimal):
+        try:
+            newval = newval/10
+        except ZeroDivisionError:
+            return None
+    return "%.*f" %(decimal, newval)
 
 
 def fancy_case(value, case):

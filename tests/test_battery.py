@@ -1,6 +1,12 @@
 
-from battery_status import *
 import unittest
+import sys
+import os
+
+try:
+    from battery_status import *
+except ImportError:
+    from ...battery_status import *
 
 # ----- LOGGING SETUP -----
 log = logging.getLogger(__name__)
@@ -22,7 +28,7 @@ log.addHandler(fh)
 
 
 
-class Battery_read_test(unittest.TestCase):
+class Read_test(unittest.TestCase):
 
     def test_successful(self):
         b = Battery()
@@ -34,7 +40,7 @@ class Battery_read_test(unittest.TestCase):
 
 
 
-class Battery_getAttr_test(unittest.TestCase):
+class getAttr_test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -43,19 +49,19 @@ class Battery_getAttr_test(unittest.TestCase):
         cls.b.read()
 
 
-    def test_string_return(self):
+    def test_string(self):
         value = self.b.getAttr("health")
         if not value:
             self.fail()
 
 
-    def test_none_return(self):
+    def test_none(self):
         attr = self.b.getAttr("incorrectattribute")
         if attr != None:
             self.fail()
 
 
-    def test_int_return(self):
+    def test_int(self):
         value = self.b.getAttr("capacity")
         if value:
             if isinstance(value, int):
@@ -76,7 +82,7 @@ class readData_test(unittest.TestCase):
 
 
 
-class fancyAttr_test(unittest.TestCase):
+class getFancyFormatAttr_test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -92,12 +98,12 @@ class fancyAttr_test(unittest.TestCase):
         """test case"""
         value = self.b.getFancyFormatAttr("capacity")
         if not value.endswith("%"):
-            self.debug("fancy attribute test fail: new val = %s" %value)
+            log.debug("fancy attribute test fail: new val = %s" %value)
             self.fail()
         log.debug("fancy attribute correct: new val = %s" %value)
 
 
-    def test_fancy_attr_all(self):
+    def test_all(self):
         log.info("fancy attr all test")
         for i in Battery.ATTRIBUTES:
             log.info("fancy attr %s" %i)
@@ -110,6 +116,13 @@ class fancyAttr_test(unittest.TestCase):
                 log.error("fancy attr all test fail: %s" %e)
                 continue
 
+    def test_decimal(self):
+        log.info("fancy decimal test")
+        value = self.b.getFancyFormatAttr("temp")
+        if not value[1] == ".":
+            log.debug("fancy attribute test fail: new val = %s" %value)
+            self.fail()
+        log.debug("fancy attribute correct: new val = %s" %value)
 
 
 
