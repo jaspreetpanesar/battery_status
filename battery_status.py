@@ -284,6 +284,9 @@ class Battery(object):
             [ x ]•  = discharging < 15%
             [++ ]•  = charging    >= 60%
             [ + ]•  = charging    > 15%
+
+        Returns:
+            string: battery icon
         """
         log.info("getCapacityIcon called")
 
@@ -318,11 +321,20 @@ class Battery(object):
 
 
     def showMinimal(self):
-        """ """
+        """return a minimal display for battery
+        capacity and status
+        
+        Example:
+            79% [xx ]•
+
+        Returns:
+            string: battery status (%) and graphical 
+                battery icon
+        """
         return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon())
 
 
-    def viewAll(self):
+    def showAll(self):
         """ """
         log.info("Battery.showAll called")
         view = ""
