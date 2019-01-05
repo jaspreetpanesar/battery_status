@@ -348,12 +348,20 @@ class Battery(object):
         try:
             if charge >= 80:
                 body = "{0}{0}{0}".format(icon)
+                if showcolour:
+                    body = Colour.format(body, Colour.CYAN)
             elif charge >= 35:
                 body = "{0}{0} ".format(icon)
+                if showcolour:
+                    body = Colour.format(body, Colour.DARKCYAN)
             elif charge >= 15:
                 body = "{0}  ".format(icon)
+                if showcolour:
+                    body = Colour.format(body, Colour.PURPLE)
             else:
                 body = " %s " %icon
+                if showcolour:
+                    body = Colour.format(body, Colour.RED)
         except TypeError as e:
             log.error("charge could not be read: %s" %e)
             body = " %s " %icon
@@ -379,7 +387,7 @@ class Battery(object):
             string: battery status (%) and graphical 
                 battery icon
         """
-        return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon())
+        return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon(showcolour=showcolour))
 
 
     def showAll(self, showcolour=False):
@@ -443,8 +451,7 @@ def readData(filepath):
 def main():
     b = Battery()
     b.read()
-    # print(b.showMinimal())
-    print( Colour.format(b.showMinimal(), Colour.GREEN) )
+    print(b.showMinimal(showcolour=True))
 
 
 
