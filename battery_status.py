@@ -305,12 +305,14 @@ class Battery(object):
         return val
 
 
-    def getCapacityIcon(self, status=None, charge=None):
+    def getCapacityIcon(self, status=None, charge=None, showcolour=False):
         """returns battery icon showing capcity and status
 
         Args:
             status (string): for debugging, specify charge status
             charge (int):  for debugging, specify charge remaining
+            showcolour (bool, optional): specify if text should 
+                be in colour. False by default.
 
         Example:
             [xxx]•  = discharging >= 80%
@@ -362,12 +364,16 @@ class Battery(object):
         return final
 
 
-    def showMinimal(self):
+    def showMinimal(self, showcolour=False):
         """return a minimal display for battery
         capacity and status
         
         Example:
             79% [xx ]•
+
+        Args:
+            showcolour (bool, optional): specify if text
+                should be in colour. False by default.
 
         Returns:
             string: battery status (%) and graphical 
@@ -376,15 +382,27 @@ class Battery(object):
         return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon())
 
 
-    def showAll(self):
-        """ """
+    def showAll(self, showcolour=False):
+        """print all battery information to stdout
+
+        Args:
+            showcolour (bool, optional): show colour in output.
+                False by default.
+        """
         log.info("Battery.showAll called")
-        view = ""
 
+        # large battery
+        print("\n<large battery icon here\\>\n")
+
+        # content
         for i in Battery.ATTRIBUTES:
-            view += "\n\t%-15s: %s" %(i, getattr(self, i, "no available"))
-
-        return view
+            attr = self.getFancyFormatAttr(i)
+            if attr:
+                if showcolour:
+                    line = "%s: %s" %(Colour.format(fancy_case(i, "capital"), Colour.RED), attr)
+                else:
+                    line = "%s: %s" %(fancy_case(i, "capital"), attr)
+                print(line)
 
 
     def __repr__(self):
@@ -425,8 +443,8 @@ def readData(filepath):
 def main():
     b = Battery()
     b.read()
-    print(b.showMinimal())
-    # print( Colour.format(b.showMinimal(), Colour.GREEN) )
+    # print(b.showMinimal())
+    print( Colour.format(b.showMinimal(), Colour.GREEN) )
 
 
 
