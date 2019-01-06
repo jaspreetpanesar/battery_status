@@ -21,7 +21,7 @@ __version__ = 1
 
 
 # ----- LOGGING SETUP -----
-log = logging.getLogger(__name__)
+log = logging.getLogger("battery_status_test")
 log.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
@@ -185,6 +185,7 @@ class Battery(object):
                          }, 
         "status":       {"path": "/sys/class/power_supply/battery/status",
                          "case": "upper"
+
                          }, 
         "chargeCount":  {"path": "/sys/class/power_supply/battery/charge_counter"
                          }, 
@@ -297,7 +298,7 @@ class Battery(object):
         return val
 
 
-    def getCapacityIcon(self, status=None, charge=None, showcolour=False):
+    def getSmallIcon(self, status=None, charge=None, showcolour=False):
         """returns battery icon showing capcity and status
 
         Args:
@@ -316,7 +317,7 @@ class Battery(object):
         Returns:
             string: battery icon
         """
-        log.info("getCapacityIcon called")
+        log.info("getSmallIcon called")
 
         # determine charge icon
         if not status:
@@ -324,10 +325,8 @@ class Battery(object):
         log.debug("status = %s" %status)
 
         try:
-            if status.lower() == "charging":
-                icon = "+"
-            else:
-                icon = "x"
+            icons = { "charging":"+", "discharging":"x", "full":"#" }
+            icon = icons.get(status.lower(), "?")
         except AttributeError as e:
             log.error("status could not be read: %s" %e)
             icon = "?"
@@ -380,30 +379,51 @@ class Battery(object):
             string: battery status (%) and graphical 
                 battery icon
         """
-        return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getCapacityIcon(showcolour=showcolour))
+        return "%s %s" %(self.getFancyFormatAttr("capacity"), self.getSmallIcon(showcolour=showcolour))
 
 
-    def showAll(self, showcolour=False):
+    def showData(self, showcolour=False):
         """print all battery information to stdout
 
         Args:
             showcolour (bool, optional): show colour in output.
                 False by default.
-        """
-        log.info("Battery.showAll called")
 
-        # large battery
-        print("\n<large battery icon here\\>\n")
+        Returns:
+            array of strings: all battery information lines stored in
+                an array
+        """
+        log.info("Battery showData called")
 
         # content
+        content = []
         for i in Battery.ATTRIBUTES:
+            log.info("reading attribute %s" %i)
             attr = self.getFancyFormatAttr(i)
             if attr:
                 if showcolour:
                     line = "%s: %s" %(Colour.format(fancy_case(i, "capital"), Colour.RED), attr)
                 else:
                     line = "%s: %s" %(fancy_case(i, "capital"), attr)
-                print(line)
+                log.debug("showData line = %s" %line)
+                content.append(line)
+
+        return content
+
+
+    def getLargeIcon(self, showcolour=False):
+        # generate dynamically, instead of a static text block
+        return """
+    ########################################
+    ##                                    ##
+    ##                                    ######
+    ##                                    ##   #
+    ##   SOMEONE UNPLUGEGD THE BATTERY    ##   #
+    ##                                    ##   #
+    ##                                    ######
+    ##                                    ##
+    ########################################
+        """
 
 
     def __repr__(self):
@@ -441,11 +461,59 @@ def readData(filepath):
     return data
 
 
-def main():
-    print(Battery().showMinimal(showcolour=False))
+def main(args):
+    b = Battery()
+
+    if args.all:
+        print(b.getLargeIcon(showcolour=args.showcolour))
+        for line in b.showData(showcolour=args.showcolour):
+            print(line)
+
+    if args.minimal:
+        print(b.showMinimal(showcolour=args.showcolour))
+
+    if args.data:
+        for line in b.showData(showcolour=args.showcolour):
+            print(line)
+
+    if args.small:
+        print(b.getSmallIcon(showcolour=args.showcolour))
+
+    if args.big:
+        print(b.getLargeIcon(showcolour=args.showcolour))
+
+    if args.information:
+        print(b.getFancyFormatAttr("capacity"))
 
 
 
 if __name__ == "__main__":
-    main()
+
+    # setup argument parser
+    parser = argparse.ArgumentParser(description="View battery status")
+
+    parser.add_argument("-c", "--showcolour", action="store_true", 
+                help="show colour on output text. False by default")
+
+    parser.add_argument("-a", "--all", action="store_true", 
+                help="View all battery information")
+
+    parser.add_argument("-m", "--minimal", action="store_true", 
+                help="view battery icon and capacity information")
+
+    parser.add_argument("-d", "--data", action="store_true", 
+                help="view all battery data")
+
+    parser.add_argument("-s", "--small", action="store_true", 
+                help="view small battery icon")
+
+    parser.add_argument("-b", "--big", action="store_true", 
+                help="view large battery icon")
+
+    parser.add_argument("-i", "--information", action="store_true", 
+                help="view battery capacity information only")
+
+
+    args = parser.parse_args()
+    main(args)
 

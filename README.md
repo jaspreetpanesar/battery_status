@@ -32,9 +32,22 @@ To install the script, follow the steps listed below:
     source ~/.bashrc
     ```
 
-4.  Run Simple Screen.
+### How to Use
+1.  To see battery capacity and small icon:
     ```
-    battery 
+    battery -m
+    ```
+2.  To show battery_status help:
+    ```
+    battery -h
+    ```
+3.  To see all battery information:
+    ```
+    battery -d
+    ```
+4.  To see values in colour, add -c option. Example:
+    ```
+    battery -dc
     ```
 
 ## Author
