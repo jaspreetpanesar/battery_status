@@ -464,26 +464,40 @@ def readData(filepath):
 def main(args):
     b = Battery()
 
+    # has user provided any arguments when running script
+    userargs = False
+
     if args.all:
+        userargs = True
         print(b.getLargeIcon(showcolour=args.showcolour))
         for line in b.showData(showcolour=args.showcolour):
             print(line)
 
     if args.minimal:
+        userargs = True
         print(b.showMinimal(showcolour=args.showcolour))
 
     if args.data:
+        userargs = True
         for line in b.showData(showcolour=args.showcolour):
             print(line)
 
     if args.small:
+        userargs = True
         print(b.getSmallIcon(showcolour=args.showcolour))
 
     if args.big:
+        userargs = True
         print(b.getLargeIcon(showcolour=args.showcolour))
 
     if args.information:
+        userargs = True
         print(b.getFancyFormatAttr("capacity"))
+
+
+    # show minimal icon if no arguments passed (excluding colour argument)
+    if not userargs:
+        print(b.showMinimal(showcolour=args.showcolour))
 
 
 
